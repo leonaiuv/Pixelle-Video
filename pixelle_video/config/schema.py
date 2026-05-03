@@ -71,10 +71,10 @@ class VideoSubConfig(BaseModel):
 class DirectImageApiConfig(BaseModel):
     """Direct image API configuration"""
     enabled: bool = Field(default=False, description="Use a direct image API instead of ComfyUI/RunningHub for image workflows")
-    provider: Literal["openai_images"] = Field(default="openai_images", description="Direct image API provider")
+    provider: Literal["openrouter_chat", "openai_images"] = Field(default="openrouter_chat", description="Direct image API provider")
     api_key: Optional[str] = Field(default=None, description="Image API key")
-    base_url: Optional[str] = Field(default=None, description="Image API base URL, optional for OpenAI")
-    model: str = Field(default="gpt-image-1", description="Image generation model")
+    base_url: Optional[str] = Field(default=None, description="Image API base URL")
+    model: str = Field(default="openai/gpt-5.4-image-2", description="Image generation model")
     size: str = Field(default="auto", description="Image size, e.g. auto, 1024x1024, 1024x1536")
     quality: str = Field(default="auto", description="Image quality, e.g. auto, low, medium, high")
     output_format: str = Field(default="png", description="Image output format: png, jpeg, or webp")

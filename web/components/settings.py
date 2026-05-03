@@ -304,17 +304,25 @@ def render_advanced_settings():
                 )
                 provider_col, model_col = st.columns(2)
                 with provider_col:
+                    provider_options = ["openrouter_chat", "openai_images"]
+                    current_provider = direct_image_config.get("provider", "openrouter_chat")
                     direct_image_provider = st.selectbox(
                         tr("settings.direct_api.provider"),
-                        options=["openai_images"],
-                        index=0,
+                        options=provider_options,
+                        index=provider_options.index(current_provider) if current_provider in provider_options else 0,
+                        format_func=lambda value: tr(f"settings.direct_api.provider_{value}"),
                         help=tr("settings.direct_api.provider_help"),
                         key="direct_image_provider_input"
                     )
                 with model_col:
+                    default_image_model = (
+                        "openai/gpt-5.4-image-2"
+                        if direct_image_provider == "openrouter_chat"
+                        else "gpt-image-1"
+                    )
                     direct_image_model = st.text_input(
                         tr("settings.direct_api.model"),
-                        value=direct_image_config.get("model", "gpt-image-1"),
+                        value=direct_image_config.get("model", default_image_model) or default_image_model,
                         help=tr("settings.direct_api.model_help"),
                         key="direct_image_model_input"
                     )

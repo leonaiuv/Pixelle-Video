@@ -56,10 +56,10 @@ comfyui:
 direct_media_api:
   image:
     enabled: false
-    provider: openai_images
+    provider: openrouter_chat
     api_key: ""
-    base_url: ""  # Leave empty for OpenAI; set for OpenAI-compatible providers
-    model: gpt-image-1
+    base_url: ""  # Leave empty for OpenRouter (https://openrouter.ai/api/v1)
+    model: openai/gpt-5.4-image-2
     size: auto
     quality: auto
     output_format: png

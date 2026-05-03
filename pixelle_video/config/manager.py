@@ -177,7 +177,7 @@ class ConfigManager:
     def set_direct_image_api_config(
         self,
         enabled: bool,
-        provider: str = "openai_images",
+        provider: str = "openrouter_chat",
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
         model: Optional[str] = None,
