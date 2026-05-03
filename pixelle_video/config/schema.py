@@ -15,7 +15,7 @@ Configuration schema with Pydantic models
 
 Single source of truth for all configuration defaults and validation.
 """
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 
@@ -68,6 +68,23 @@ class VideoSubConfig(BaseModel):
     )
 
 
+class DirectImageApiConfig(BaseModel):
+    """Direct image API configuration"""
+    enabled: bool = Field(default=False, description="Use a direct image API instead of ComfyUI/RunningHub for image workflows")
+    provider: Literal["openai_images"] = Field(default="openai_images", description="Direct image API provider")
+    api_key: Optional[str] = Field(default=None, description="Image API key")
+    base_url: Optional[str] = Field(default=None, description="Image API base URL, optional for OpenAI")
+    model: str = Field(default="gpt-image-1", description="Image generation model")
+    size: str = Field(default="auto", description="Image size, e.g. auto, 1024x1024, 1024x1536")
+    quality: str = Field(default="auto", description="Image quality, e.g. auto, low, medium, high")
+    output_format: str = Field(default="png", description="Image output format: png, jpeg, or webp")
+
+
+class DirectMediaApiConfig(BaseModel):
+    """Direct media API configuration"""
+    image: DirectImageApiConfig = Field(default_factory=DirectImageApiConfig, description="Direct image API settings")
+
+
 class ComfyUIConfig(BaseModel):
     """ComfyUI configuration (includes global settings and service-specific configs)"""
     comfyui_url: str = Field(default="http://127.0.0.1:8188", description="ComfyUI Server URL")
@@ -93,6 +110,7 @@ class PixelleVideoConfig(BaseModel):
     project_name: str = Field(default="Pixelle-Video", description="Project name")
     llm: LLMConfig = Field(default_factory=LLMConfig)
     comfyui: ComfyUIConfig = Field(default_factory=ComfyUIConfig)
+    direct_media_api: DirectMediaApiConfig = Field(default_factory=DirectMediaApiConfig)
     template: TemplateConfig = Field(default_factory=TemplateConfig)
     
     def is_llm_configured(self) -> bool:
@@ -110,4 +128,3 @@ class PixelleVideoConfig(BaseModel):
     def to_dict(self) -> dict:
         """Convert to dictionary (for backward compatibility)"""
         return self.model_dump()
-

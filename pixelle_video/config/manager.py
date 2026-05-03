@@ -144,6 +144,10 @@ class ConfigManager:
                 "prompt_prefix": self.config.comfyui.video.prompt_prefix,
             }
         }
+
+    def get_direct_media_api_config(self) -> dict:
+        """Get direct media API configuration as dict"""
+        return self.config.direct_media_api.model_dump()
     
     def set_comfyui_config(
         self, 
@@ -170,3 +174,31 @@ class ConfigManager:
         if updates:
             self.update({"comfyui": updates})
 
+    def set_direct_image_api_config(
+        self,
+        enabled: bool,
+        provider: str = "openai_images",
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        model: Optional[str] = None,
+        size: Optional[str] = None,
+        quality: Optional[str] = None,
+        output_format: Optional[str] = None,
+    ):
+        """Set direct image API configuration"""
+        image_updates = {
+            "enabled": enabled,
+            "provider": provider,
+            "api_key": api_key,
+            "base_url": base_url,
+        }
+        if model is not None:
+            image_updates["model"] = model
+        if size is not None:
+            image_updates["size"] = size
+        if quality is not None:
+            image_updates["quality"] = quality
+        if output_format is not None:
+            image_updates["output_format"] = output_format
+
+        self.update({"direct_media_api": {"image": image_updates}})

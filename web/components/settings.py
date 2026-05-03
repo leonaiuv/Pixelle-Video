@@ -211,6 +211,8 @@ def render_advanced_settings():
                 
                 # Get current configuration
                 comfyui_config = config_manager.get_comfyui_config()
+                direct_media_config = config_manager.get_direct_media_api_config()
+                direct_image_config = direct_media_config.get("image", {})
                 
                 # Local/Self-hosted ComfyUI configuration
                 st.markdown(f"**{tr('settings.comfyui.local_title')}**")
@@ -289,6 +291,74 @@ def render_advanced_settings():
                     )
                     # Convert display value back to actual value
                     runninghub_48g_enabled = runninghub_instance_type_display == tr("settings.comfyui.runninghub_instance_48g")
+
+                st.markdown("---")
+
+                # Direct image API configuration
+                st.markdown(f"**{tr('settings.direct_api.title')}**")
+                direct_image_enabled = st.checkbox(
+                    tr("settings.direct_api.image_enabled"),
+                    value=direct_image_config.get("enabled", False),
+                    help=tr("settings.direct_api.image_enabled_help"),
+                    key="direct_image_enabled_input"
+                )
+                provider_col, model_col = st.columns(2)
+                with provider_col:
+                    direct_image_provider = st.selectbox(
+                        tr("settings.direct_api.provider"),
+                        options=["openai_images"],
+                        index=0,
+                        help=tr("settings.direct_api.provider_help"),
+                        key="direct_image_provider_input"
+                    )
+                with model_col:
+                    direct_image_model = st.text_input(
+                        tr("settings.direct_api.model"),
+                        value=direct_image_config.get("model", "gpt-image-1"),
+                        help=tr("settings.direct_api.model_help"),
+                        key="direct_image_model_input"
+                    )
+                direct_key_col, direct_base_col = st.columns(2)
+                with direct_key_col:
+                    direct_image_api_key = st.text_input(
+                        tr("settings.direct_api.api_key"),
+                        value=direct_image_config.get("api_key", "") or "",
+                        type="password",
+                        help=tr("settings.direct_api.api_key_help"),
+                        key="direct_image_api_key_input"
+                    )
+                with direct_base_col:
+                    direct_image_base_url = st.text_input(
+                        tr("settings.direct_api.base_url"),
+                        value=direct_image_config.get("base_url", "") or "",
+                        help=tr("settings.direct_api.base_url_help"),
+                        key="direct_image_base_url_input"
+                    )
+                direct_size_col, direct_quality_col = st.columns(2)
+                with direct_size_col:
+                    direct_image_size = st.selectbox(
+                        tr("settings.direct_api.size"),
+                        options=["auto", "1024x1024", "1024x1536", "1536x1024"],
+                        index=["auto", "1024x1024", "1024x1536", "1536x1024"].index(
+                            direct_image_config.get("size", "auto")
+                            if direct_image_config.get("size", "auto") in ["auto", "1024x1024", "1024x1536", "1536x1024"]
+                            else "auto"
+                        ),
+                        help=tr("settings.direct_api.size_help"),
+                        key="direct_image_size_input"
+                    )
+                with direct_quality_col:
+                    direct_image_quality = st.selectbox(
+                        tr("settings.direct_api.quality"),
+                        options=["auto", "low", "medium", "high"],
+                        index=["auto", "low", "medium", "high"].index(
+                            direct_image_config.get("quality", "auto")
+                            if direct_image_config.get("quality", "auto") in ["auto", "low", "medium", "high"]
+                            else "auto"
+                        ),
+                        help=tr("settings.direct_api.quality_help"),
+                        key="direct_image_quality_input"
+                    )
         
         # ====================================================================
         # Action Buttons (full width at bottom)
@@ -315,6 +385,16 @@ def render_advanced_settings():
                         runninghub_concurrent_limit=int(runninghub_concurrent_limit),
                         runninghub_instance_type=instance_type
                     )
+                    config_manager.set_direct_image_api_config(
+                        enabled=direct_image_enabled,
+                        provider=direct_image_provider,
+                        api_key=direct_image_api_key if direct_image_api_key else None,
+                        base_url=direct_image_base_url if direct_image_base_url else None,
+                        model=direct_image_model,
+                        size=direct_image_size,
+                        quality=direct_image_quality,
+                        output_format="png",
+                    )
                     
                     # Only save to file if LLM config is valid
                     if llm_api_key and llm_base_url and llm_model:
@@ -332,4 +412,3 @@ def render_advanced_settings():
                 config_manager.save()
                 st.success(tr("status.config_reset"))
                 safe_rerun()
-

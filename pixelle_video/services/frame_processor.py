@@ -422,6 +422,15 @@ class FrameProcessor:
         """Download media (image or video) from URL to local file"""
         from pixelle_video.utils.os_util import get_task_frame_path
         output_path = get_task_frame_path(task_id, frame_index, media_type)
+
+        # Direct API providers may already save generated media locally. In
+        # that case, copy it into the task folder so downstream composition
+        # still sees the same frame file layout.
+        import os
+        if os.path.exists(url):
+            import shutil
+            shutil.copyfile(url, output_path)
+            return output_path
         
         timeout = httpx.Timeout(connect=10.0, read=60, write=60, pool=60)
         async with httpx.AsyncClient(timeout=timeout) as client:
@@ -444,4 +453,3 @@ class FrameProcessor:
             logger.warning(f"Failed to get video duration: {e}, using audio duration")
             # Fallback: use audio duration if available
             return 1.0  # Default to 1 second if unable to determine
-

@@ -50,6 +50,20 @@ comfyui:
     # Video prompt prefix (optional)
     prompt_prefix: "Minimalist black-and-white matchstick figure style illustration, clean lines, simple sketch style"
 
+# ==================== Direct Media API Configuration ====================
+# Optional: use pay-as-you-go model APIs for image generation instead of
+# ComfyUI/RunningHub image workflows. Video generation still uses workflows.
+direct_media_api:
+  image:
+    enabled: false
+    provider: openai_images
+    api_key: ""
+    base_url: ""  # Leave empty for OpenAI; set for OpenAI-compatible providers
+    model: gpt-image-1
+    size: auto
+    quality: auto
+    output_format: png
+
 # ==================== Template Configuration ====================
 # Configure default template for video generation
 template:

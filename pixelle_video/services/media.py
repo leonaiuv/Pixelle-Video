@@ -22,7 +22,9 @@ from typing import Optional
 from comfykit import ComfyKit
 from loguru import logger
 
+from pixelle_video.config import config_manager
 from pixelle_video.services.comfy_base_service import ComfyBaseService
+from pixelle_video.services.direct_media_api import DirectMediaApiService
 from pixelle_video.models.media import MediaResult
 
 
@@ -194,6 +196,24 @@ class MediaService(ComfyBaseService):
                 comfyui_url="http://192.168.1.100:8188"
             )
         """
+        # Direct API image provider: pay-as-you-go APIs can replace the
+        # ComfyUI/RunningHub image path while keeping the rest of the video
+        # pipeline unchanged.
+        current_config = config_manager.config.to_dict()
+        direct_media_api = DirectMediaApiService(current_config)
+        if media_type == "image" and direct_media_api.is_image_enabled():
+            return await direct_media_api.generate_image(
+                prompt=prompt,
+                width=width,
+                height=height,
+                negative_prompt=negative_prompt,
+                steps=steps,
+                seed=seed,
+                cfg=cfg,
+                sampler=sampler,
+                **params
+            )
+
         # 1. Resolve workflow (returns structured info)
         workflow_info = self._resolve_workflow(workflow=workflow)
         
