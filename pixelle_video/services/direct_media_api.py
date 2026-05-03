@@ -173,7 +173,7 @@ class DirectMediaApiService:
 
         quality = image_config.get("quality")
         if quality and quality != "auto":
-            config["image_size"] = {"low": "0.5K", "medium": "1K", "high": "2K"}.get(quality, quality)
+            config["image_size"] = {"low": "1K", "medium": "2K", "high": "4K"}.get(quality, quality)
 
         return config
 
