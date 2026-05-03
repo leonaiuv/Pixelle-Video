@@ -371,6 +371,12 @@ class HTMLFrameGenerator:
             "text": text,
             "image": image,
         }
+
+        try:
+            from pixelle_video.config import config_manager
+            context.update(config_manager.get_branding_template_params())
+        except Exception as e:
+            logger.debug(f"Could not load global branding configuration: {e}")
         
         if ext:
             context.update(ext)

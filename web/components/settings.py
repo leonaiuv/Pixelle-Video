@@ -21,6 +21,40 @@ from web.utils.streamlit_helpers import safe_rerun
 from pixelle_video.config import config_manager
 
 
+def _get_branding_config() -> dict:
+    if hasattr(config_manager, "get_branding_config"):
+        return config_manager.get_branding_config()
+
+    branding = getattr(config_manager.config, "branding", None)
+    if branding and hasattr(branding, "model_dump"):
+        return branding.model_dump()
+
+    return {
+        "enabled": True,
+        "author": "@Pixelle.AI",
+        "brand": "Pixelle-Video",
+        "signature": "@Pixelle.AI",
+        "describe": "Open Source Omnimodal AI Creative Agent",
+    }
+
+
+def _set_branding_config(
+    enabled: bool,
+    author: str,
+    brand: str,
+    signature: str,
+    describe: str,
+):
+    if hasattr(config_manager, "set_branding_config"):
+        config_manager.set_branding_config(
+            enabled=enabled,
+            author=author,
+            brand=brand,
+            signature=signature,
+            describe=describe,
+        )
+
+
 def render_advanced_settings():
     """Render system configuration (required) with 2-column layout"""
     # Check if system is configured
@@ -213,6 +247,7 @@ def render_advanced_settings():
                 comfyui_config = config_manager.get_comfyui_config()
                 direct_media_config = config_manager.get_direct_media_api_config()
                 direct_image_config = direct_media_config.get("image", {})
+                branding_config = _get_branding_config()
                 
                 # Local/Self-hosted ComfyUI configuration
                 st.markdown(f"**{tr('settings.comfyui.local_title')}**")
@@ -367,6 +402,48 @@ def render_advanced_settings():
                         help=tr("settings.direct_api.quality_help"),
                         key="direct_image_quality_input"
                     )
+
+                st.markdown("---")
+
+                # Global template branding/watermark configuration
+                st.markdown(f"**{tr('settings.branding.title')}**")
+                branding_enabled = st.checkbox(
+                    tr("settings.branding.enabled"),
+                    value=branding_config.get("enabled", True),
+                    help=tr("settings.branding.enabled_help"),
+                    key="branding_enabled_input"
+                )
+                branding_author_col, branding_brand_col = st.columns(2)
+                with branding_author_col:
+                    branding_author = st.text_input(
+                        tr("settings.branding.author"),
+                        value=branding_config.get("author", ""),
+                        help=tr("settings.branding.author_help"),
+                        key="branding_author_input"
+                    )
+                with branding_brand_col:
+                    branding_brand = st.text_input(
+                        tr("settings.branding.brand"),
+                        value=branding_config.get("brand", ""),
+                        help=tr("settings.branding.brand_help"),
+                        key="branding_brand_input"
+                    )
+
+                branding_signature_col, branding_describe_col = st.columns(2)
+                with branding_signature_col:
+                    branding_signature = st.text_input(
+                        tr("settings.branding.signature"),
+                        value=branding_config.get("signature", ""),
+                        help=tr("settings.branding.signature_help"),
+                        key="branding_signature_input"
+                    )
+                with branding_describe_col:
+                    branding_describe = st.text_input(
+                        tr("settings.branding.describe"),
+                        value=branding_config.get("describe", ""),
+                        help=tr("settings.branding.describe_help"),
+                        key="branding_describe_input"
+                    )
         
         # ====================================================================
         # Action Buttons (full width at bottom)
@@ -402,6 +479,13 @@ def render_advanced_settings():
                         size=direct_image_size,
                         quality=direct_image_quality,
                         output_format="png",
+                    )
+                    _set_branding_config(
+                        enabled=branding_enabled,
+                        author=branding_author,
+                        brand=branding_brand,
+                        signature=branding_signature,
+                        describe=branding_describe,
                     )
                     
                     # Only save to file if LLM config is valid

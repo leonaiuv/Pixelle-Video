@@ -148,6 +148,28 @@ class ConfigManager:
     def get_direct_media_api_config(self) -> dict:
         """Get direct media API configuration as dict"""
         return self.config.direct_media_api.model_dump()
+
+    def get_branding_config(self) -> dict:
+        """Get global branding configuration as dict"""
+        return self.config.branding.model_dump()
+
+    def get_branding_template_params(self) -> dict:
+        """Get global branding values keyed for template placeholders."""
+        branding = self.config.branding
+        if not branding.enabled:
+            return {
+                "author": "",
+                "brand": "",
+                "signature": "",
+                "describe": "",
+            }
+
+        return {
+            "author": branding.author,
+            "brand": branding.brand,
+            "signature": branding.signature,
+            "describe": branding.describe,
+        }
     
     def set_comfyui_config(
         self, 
@@ -202,3 +224,22 @@ class ConfigManager:
             image_updates["output_format"] = output_format
 
         self.update({"direct_media_api": {"image": image_updates}})
+
+    def set_branding_config(
+        self,
+        enabled: bool,
+        author: str = "",
+        brand: str = "",
+        signature: str = "",
+        describe: str = "",
+    ):
+        """Set global branding/watermark defaults."""
+        self.update({
+            "branding": {
+                "enabled": enabled,
+                "author": author,
+                "brand": brand,
+                "signature": signature,
+                "describe": describe,
+            }
+        })

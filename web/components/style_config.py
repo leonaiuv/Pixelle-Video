@@ -15,6 +15,7 @@ Style configuration components for web UI (middle column)
 """
 
 import os
+import hashlib
 from pathlib import Path
 
 import streamlit as st
@@ -24,6 +25,39 @@ from web.i18n import tr, get_language
 from web.utils.async_helpers import run_async
 from web.utils.streamlit_helpers import check_and_warn_selfhost_workflow
 from pixelle_video.config import config_manager
+
+
+def _get_branding_config() -> dict:
+    if hasattr(config_manager, "get_branding_config"):
+        return config_manager.get_branding_config()
+
+    branding = getattr(config_manager.config, "branding", None)
+    if branding and hasattr(branding, "model_dump"):
+        return branding.model_dump()
+
+    return {
+        "enabled": True,
+        "author": "@Pixelle.AI",
+        "brand": "Pixelle-Video",
+        "signature": "@Pixelle.AI",
+        "describe": "Open Source Omnimodal AI Creative Agent",
+    }
+
+
+def _get_branding_template_params() -> dict:
+    if hasattr(config_manager, "get_branding_template_params"):
+        return config_manager.get_branding_template_params()
+
+    branding = _get_branding_config()
+    if not branding.get("enabled", True):
+        return {"author": "", "brand": "", "signature": "", "describe": ""}
+
+    return {
+        "author": branding.get("author", ""),
+        "brand": branding.get("brand", ""),
+        "signature": branding.get("signature", ""),
+        "describe": branding.get("describe", ""),
+    }
 
 
 def render_style_config(pixelle_video):
@@ -525,6 +559,19 @@ def render_style_config(pixelle_video):
         
         custom_values_for_video = {}
         if custom_params_for_video:
+            branding_config = _get_branding_config()
+            branding_template_params = _get_branding_template_params()
+            branding_fingerprint = "|".join(
+                str(branding_config.get(key, ""))
+                for key in ("enabled", "author", "brand", "signature", "describe")
+            )
+            branding_key_suffix = hashlib.sha1(branding_fingerprint.encode("utf-8")).hexdigest()[:12]
+
+            def template_param_key(param_name: str) -> str:
+                if param_name in branding_template_params:
+                    return f"video_custom_{param_name}_{branding_key_suffix}"
+                return f"video_custom_{param_name}"
+
             st.markdown("📝 " + tr("template.custom_parameters"))
             
             # Render custom parameter inputs in 2 columns
@@ -539,30 +586,31 @@ def render_style_config(pixelle_video):
                     param_type = config['type']
                     default = config['default']
                     label = config['label']
+                    input_default = branding_template_params.get(param_name, default)
                     
                     if param_type == 'text':
                         custom_values_for_video[param_name] = st.text_input(
                             label,
-                            value=default,
-                            key=f"video_custom_{param_name}"
+                            value=input_default,
+                            key=template_param_key(param_name)
                         )
                     elif param_type == 'number':
                         custom_values_for_video[param_name] = st.number_input(
                             label,
-                            value=default,
-                            key=f"video_custom_{param_name}"
+                            value=input_default,
+                            key=template_param_key(param_name)
                         )
                     elif param_type == 'color':
                         custom_values_for_video[param_name] = st.color_picker(
                             label,
-                            value=default,
-                            key=f"video_custom_{param_name}"
+                            value=input_default,
+                            key=template_param_key(param_name)
                         )
                     elif param_type == 'bool':
                         custom_values_for_video[param_name] = st.checkbox(
                             label,
-                            value=default,
-                            key=f"video_custom_{param_name}"
+                            value=input_default,
+                            key=template_param_key(param_name)
                         )
             
             # Right column parameters
@@ -571,30 +619,31 @@ def render_style_config(pixelle_video):
                     param_type = config['type']
                     default = config['default']
                     label = config['label']
+                    input_default = branding_template_params.get(param_name, default)
                     
                     if param_type == 'text':
                         custom_values_for_video[param_name] = st.text_input(
                             label,
-                            value=default,
-                            key=f"video_custom_{param_name}"
+                            value=input_default,
+                            key=template_param_key(param_name)
                         )
                     elif param_type == 'number':
                         custom_values_for_video[param_name] = st.number_input(
                             label,
-                            value=default,
-                            key=f"video_custom_{param_name}"
+                            value=input_default,
+                            key=template_param_key(param_name)
                         )
                     elif param_type == 'color':
                         custom_values_for_video[param_name] = st.color_picker(
                             label,
-                            value=default,
-                            key=f"video_custom_{param_name}"
+                            value=input_default,
+                            key=template_param_key(param_name)
                         )
                     elif param_type == 'bool':
                         custom_values_for_video[param_name] = st.checkbox(
                             label,
-                            value=default,
-                            key=f"video_custom_{param_name}"
+                            value=input_default,
+                            key=template_param_key(param_name)
                         )
         
         # Template preview expander

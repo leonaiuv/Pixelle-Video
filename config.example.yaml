@@ -79,3 +79,14 @@ template:
   #   - 1920x1080 (horizontal/landscape): image_film.html, image_full.html, etc.
   # See templates/ directory for all available templates
   default_template: "1080x1920/image_default.html"
+
+# ==================== Branding / Watermark Configuration ====================
+# These values override matching template parameters such as
+# {{author=@Pixelle.AI}}, {{brand=Pixelle-Video}}, and {{signature=@Pixelle.AI}}.
+# Turn enabled off to render those common branding placeholders as empty text.
+branding:
+  enabled: true
+  author: "@Pixelle.AI"
+  brand: "Pixelle-Video"
+  signature: "@Pixelle.AI"
+  describe: "Open Source Omnimodal AI Creative Agent"

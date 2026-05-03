@@ -105,6 +105,18 @@ class TemplateConfig(BaseModel):
     )
 
 
+class BrandingConfig(BaseModel):
+    """Global branding/watermark defaults for HTML templates"""
+    enabled: bool = Field(default=True, description="Show global branding text in templates")
+    author: str = Field(default="@Pixelle.AI", description="Default author text")
+    brand: str = Field(default="Pixelle-Video", description="Default brand text")
+    signature: str = Field(default="@Pixelle.AI", description="Default signature text")
+    describe: str = Field(
+        default="Open Source Omnimodal AI Creative Agent",
+        description="Default brand description/subtitle text"
+    )
+
+
 class PixelleVideoConfig(BaseModel):
     """Pixelle-Video main configuration"""
     project_name: str = Field(default="Pixelle-Video", description="Project name")
@@ -112,6 +124,7 @@ class PixelleVideoConfig(BaseModel):
     comfyui: ComfyUIConfig = Field(default_factory=ComfyUIConfig)
     direct_media_api: DirectMediaApiConfig = Field(default_factory=DirectMediaApiConfig)
     template: TemplateConfig = Field(default_factory=TemplateConfig)
+    branding: BrandingConfig = Field(default_factory=BrandingConfig)
     
     def is_llm_configured(self) -> bool:
         """Check if LLM is properly configured"""
